@@ -1,21 +1,15 @@
 #!/usr/bin/env python
- 
-#importamos el modulo socket
+# -*- coding: utf-8 -*-
+
 import socket
 
-# #instanciamos un objeto para trabajar con el socket
+# instanciamos un objeto para trabajar con el socket
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
- 
-# #Con el metodo bind le indicamos que puerto debe escuchar y de que servidor esperar conexiones
-# #Es mejor dejarlo en blanco para recibir conexiones externas si es nuestro caso
-s.bind(("", 9999))
 
+s.bind(("", 9898)) # escucha los clientes que se dirijan al puerto
 
- 
-#Aceptamos conexiones entrantes con el metodo listen, y ademas aplicamos como parametro
-#El numero de conexiones entrantes que vamos a aceptar
 s.listen(1)
  
 #Instanciamos un objeto sc (socket cliente) para recibir datos, al recibir datos este
@@ -24,21 +18,14 @@ sc, addr = s.accept()
  
 while True:
  
-    #Recibimos el mensaje, con el metodo recv recibimos datos y como parametro
-    #la cantidad de bytes para recibir
+    # Recibe mensaje
     recibido = sc.recv(1024)
  
-    #Si el mensaje recibido es la palabra close se cierra la aplicacion
-    if recibido == "close":
-        break
- 
-    #Si se reciben datos nos muestra la IP y el mensaje recibido
+    # Muestra la IP y el mensaje recibido
     print str(addr[0]) + " dice: ", recibido
  
-    #Devolvemos el mensaje al cliente
+    # Retorna el mansaje al cliente
     sc.send(recibido)
-print "Adios."
- 
-#Cerramos la instancia del socket cliente y servidor
-sc.close()
-s.close()
+
+sc.close() # Cierra socket cliente
+s.close() # Cierra socket servidor

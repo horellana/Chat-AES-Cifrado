@@ -19,6 +19,9 @@ def chat(Host, Port, username):
             if input_data != "":
                 print(username+": "+input_data.decode("utf-8") if
                       isinstance(input_data, bytes) else username+": "+input_data)
+        if input_data == "salir":
+            s.close()
+            break
     s.close() # Cierra el socket
 
 def main():
@@ -27,6 +30,8 @@ def main():
     [O.o]   Welcome to Búho chat
     /)__)       Have fun!
     -”–”- 
+
+    * Escriba "salir" para finalizar sesión
     """
     username = raw_input("Ingrese su nombre de usuario: ")
 
