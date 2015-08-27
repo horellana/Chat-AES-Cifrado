@@ -1,7 +1,20 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import sys
 import socket
+
+from Crypto.Cipher import AES
+from Crypto import Random
+
+key = sys.argv[1]
+iv = Random.new().read(AES.block_size)
+cipher = AES.new(key, AES.MODE_CFB, iv)
+
+
+def cifrar(mensaje):
+    global cipher
+    return iv + cipher.encrypt(mensaje)
 
 # instanciamos un objeto para trabajar con el socket
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
