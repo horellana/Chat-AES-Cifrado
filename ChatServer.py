@@ -5,8 +5,8 @@ import socket
 
 # #instanciamos un objeto para trabajar con el socket
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-s.setsockopt(socket.SO_REUSEADDR)
-s.setsockopt(socket.SO_REUSEPORT)
+s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
  
 # #Con el metodo bind le indicamos que puerto debe escuchar y de que servidor esperar conexiones
 # #Es mejor dejarlo en blanco para recibir conexiones externas si es nuestro caso
