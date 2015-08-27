@@ -1,44 +1,46 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
-import sys
-import socket
+import asyncio
 
-from Crypto.Cipher import AES
-from Crypto import Random
-
-key = sys.argv[1]
-iv = Random.new().read(AES.block_size)
-cipher = AES.new(key, AES.MODE_CFB, iv)
+clientes = []
 
 
-def cifrar(mensaje):
-    global cipher
-    return iv + cipher.encrypt(mensaje)
+### Esta clase la saque de 
+### https://docs.python.org/dev/library/asyncio-protocol.html#tcp-echo-server-protocol
+### Solo la modifique para que guarde a los clientes en la lista `clientes`
 
-# instanciamos un objeto para trabajar con el socket
-s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
+class EchoServerClientProtocol(asyncio.Protocol):
+    def connection_made(self, transport):
+        peername = transport.get_extra_info('peername')
+        print('Connection from {}'.format(peername))
+        self.transport = transport
+        clientes.append(transport)
 
-s.bind(("", 9898)) # escucha los clientes que se dirijan al puerto
+    def data_received(self, data):
+        message = data.decode()
+        print('Data received: {!r}'.format(message))
 
-s.listen(1)
- 
-#Instanciamos un objeto sc (socket cliente) para recibir datos, al recibir datos este
-#devolvera tambien un objeto que representa una tupla con los datos de conexion: IP y puerto
-sc, addr = s.accept()
- 
-while True:
- 
-    # Recibe mensaje
-    recibido = sc.recv(1024)
- 
-    # Muestra la IP y el mensaje recibido
-    print str(addr[0]) + " dice: ", recibido
- 
-    # Retorna el mansaje al cliente
-    sc.send(recibido)
+        print('Send: {!r}'.format(message))
+        for cliente in clientes:
+            cliente.write(data)
+        # self.transport.write(data)
 
-sc.close() # Cierra socket cliente
-s.close() # Cierra socket servidor
+        print('Close the client socket')
+        self.transport.close()
+
+
+loop = asyncio.get_event_loop()
+
+coro = loop.create_server(EchoServerClientProtocol, '127.0.0.1', 8888)
+server = loop.run_until_complete(coro)
+
+print('Serving on {}'.format(server.sockets[0].getsockname()))
+
+try:
+    loop.run_forever()
+except KeyboardInterrupt:
+    pass
+
+server.close()
+loop.run_until_complete(server.wait_closed())
+loop.close()
