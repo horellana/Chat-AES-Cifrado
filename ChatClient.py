@@ -10,6 +10,9 @@ def enviar_mensaje(mensaje, servidor):
     servidor.write(mensaje.encode())
 
 
+def recibir_mensaje(mensaje):
+    print(mensaje.decode())
+    
 @asyncio.coroutine
 def tcp_echo_client(loop, servidor, puerto):
     ### Nos conectamos al servidor
@@ -21,7 +24,7 @@ def tcp_echo_client(loop, servidor, puerto):
 
     while True:
         data = yield from r.read(100)
-        print(data.decode())
+        recibir_mensaje(data)
         
 if __name__ == '__main__':
     print ("""
