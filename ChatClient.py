@@ -9,6 +9,7 @@ import asyncio
 def enviar_mensaje(mensaje, servidor):
     servidor.write(mensaje.encode())
 
+
 @asyncio.coroutine
 def tcp_echo_client(loop, servidor, puerto):
     ### Nos conectamos al servidor
@@ -16,7 +17,7 @@ def tcp_echo_client(loop, servidor, puerto):
 
     ### Escuchamos stdin por mensajes enviados por nosotros
     ### (El cliente)
-    loop.add_reader(sys.stdin, lambda: w.write(sys.stdin.readline().encode()))
+    loop.add_reader(sys.stdin, lambda: enviar_mensaje(sys.stdin.readline(), w))
 
     while True:
         data = yield from r.read(100)
