@@ -9,8 +9,6 @@ contador_usuarios = 0
 ### Esta clase la saque de 
 ### https://docs.python.org/dev/library/asyncio-protocol.html#tcp-echo-server-protocol
 ### Solo la modifique para que guarde a los clientes en la lista `clientes`
-
-
 class EchoServerClientProtocol(asyncio.Protocol):
     ### Esta funcion es llamada cada vez que un nuevo cliente se conecta
     ### Aqui creamos un diccionario con los datos (nombre y socket)
@@ -30,9 +28,8 @@ class EchoServerClientProtocol(asyncio.Protocol):
 
     ### Esta funcion es llamada cuando el cliente envia un mensaje al servidor
     def data_received(self, data):
-        message = data.decode()
         ### Aqui enviamos el mensaje a todos los clientes conectados
-        self.propagar('{}: {}'.format(self.cliente['nombre'], message))
+        self.propagar('{}: {}'.format(self.cliente['nombre'], data.decode()))
 
     def connection_lost(self, exc):
         global clientes
