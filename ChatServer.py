@@ -4,30 +4,25 @@ import asyncio
 
 clientes = []
 
-
 ### Esta clase la saque de 
 ### https://docs.python.org/dev/library/asyncio-protocol.html#tcp-echo-server-protocol
 ### Solo la modifique para que guarde a los clientes en la lista `clientes`
 
+
 class EchoServerClientProtocol(asyncio.Protocol):
     def connection_made(self, transport):
-        peername = transport.get_extra_info('peername')
-        print('Connection from {}'.format(peername))
-        self.transport = transport
+        self.peername = transport.get_extra_info('peername')
+        print('Conexion desde {}'.format(self.peername))
         clientes.append(transport)
-
+        self.transport = transport
+    
     def data_received(self, data):
         message = data.decode()
-        print('Data received: {!r}'.format(message))
 
-        print('Send: {!r}'.format(message))
         for cliente in clientes:
-            cliente.write(data)
-        # self.transport.write(data)
-
-        print('Close the client socket')
-        self.transport.close()
-
+            if cliente is self.transport:
+                next
+            cliente.write('{}: {}'.format(self.peername, message).encode())
 
 loop = asyncio.get_event_loop()
 
