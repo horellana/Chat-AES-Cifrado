@@ -24,18 +24,26 @@ class EchoServerClientProtocol(asyncio.Protocol):
         contador_usuarios = contador_usuarios + 1
         self.cliente = cliente
     
+    def propagar(self, mensaje):
+        for cliente in clientes:
+            cliente['transport'].write(mensaje.encode())
+
     ### Esta funcion es llamada cuando el cliente envia un mensaje al servidor
     def data_received(self, data):
         message = data.decode()
-
         ### Aqui enviamos el mensaje a todos los clientes conectados
-        for cliente in clientes:
-            m = '{}: {}'.format(self.cliente['nombre'], message).encode()
-            cliente['transport'].write(m)
+        self.propagar('{}: {}'.format(self.cliente['nombre'], message))
+
+    def connection_lost(self, exc):
+        global clientes
+        msj = '{} Se desconecto'.format(self.cliente['nombre'])
+        ### Saca al cliente desconectado de la lista ...
+        clientes = [c for c in clientes
+                    if c['nombre'] != self.cliente['nombre']]
+        self.propagar(msj)
 
 
 if __name__ == '__main__':
-    
     loop = asyncio.get_event_loop()
 
     coro = loop.create_server(EchoServerClientProtocol, '127.0.0.1', 8888)
