@@ -43,7 +43,7 @@ class EchoServerClientProtocol(asyncio.Protocol):
 if __name__ == '__main__':
     loop = asyncio.get_event_loop()
 
-    coro = loop.create_server(EchoServerClientProtocol, '127.0.0.1', 8888)
+    coro = loop.create_server(EchoServerClientProtocol, '', 8888)
     server = loop.run_until_complete(coro)
 
     print('Serving on {}'.format(server.sockets[0].getsockname()))
