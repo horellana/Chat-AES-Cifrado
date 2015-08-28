@@ -3,6 +3,12 @@
 import sys
 import asyncio
 
+### Esta funcion es llamada cuando el usuario ingresa un mensaje
+### recibe el mensaje y un socket conectado al servidor
+### su trabajo es enviar el mensaje
+def enviar_mensaje(mensaje, servidor):
+    servidor.write(mensaje.encode())
+
 @asyncio.coroutine
 def tcp_echo_client(loop, servidor, puerto):
     ### Nos conectamos al servidor
