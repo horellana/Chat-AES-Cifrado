@@ -1,44 +1,58 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
-import sys
-import socket
+import random
+import asyncio
 
-from Crypto.Cipher import AES
-from Crypto import Random
+clientes = []
+contador_usuarios = 0
 
-key = sys.argv[1]
-iv = Random.new().read(AES.block_size)
-cipher = AES.new(key, AES.MODE_CFB, iv)
+### Esta clase la saque de 
+### https://docs.python.org/dev/library/asyncio-protocol.html#tcp-echo-server-protocol
+### Solo la modifique para que guarde a los clientes en la lista `clientes`
+class EchoServerClientProtocol(asyncio.Protocol):
+    ### Esta funcion es llamada cada vez que un nuevo cliente se conecta
+    ### Aqui creamos un diccionario con los datos (nombre y socket)
+    ### y lo guardamos en la lista de clientes.
+    ### me imagino que transport es el socket, pero no estoy seguro.
+    def connection_made(self, transport):
+        global contador_usuarios
+        cliente = {'nombre': 'user{}'.format(contador_usuarios),
+                   'transport': transport}
+        clientes.append(cliente)
+        contador_usuarios = contador_usuarios + 1
+        self.cliente = cliente
+    
+    def propagar(self, mensaje):
+        for cliente in clientes:
+            cliente['transport'].write(mensaje.encode())
+
+    ### Esta funcion es llamada cuando el cliente envia un mensaje al servidor
+    def data_received(self, data):
+        ### Aqui enviamos el mensaje a todos los clientes conectados
+        self.propagar('{}: {}'.format(self.cliente['nombre'], data.decode()))
+
+    def connection_lost(self, exc):
+        global clientes
+        msj = '{} Se desconecto'.format(self.cliente['nombre'])
+        ### Saca al cliente desconectado de la lista ...
+        clientes = [c for c in clientes
+                    if c['nombre'] != self.cliente['nombre']]
+        self.propagar(msj)
 
 
-def cifrar(mensaje):
-    global cipher
-    return iv + cipher.encrypt(mensaje)
+if __name__ == '__main__':
+    loop = asyncio.get_event_loop()
 
-# instanciamos un objeto para trabajar con el socket
-s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
+    coro = loop.create_server(EchoServerClientProtocol, '', 8888)
+    server = loop.run_until_complete(coro)
 
-s.bind(("", 9898)) # escucha los clientes que se dirijan al puerto
+    print('Serving on {}'.format(server.sockets[0].getsockname()))
 
-s.listen(1)
- 
-#Instanciamos un objeto sc (socket cliente) para recibir datos, al recibir datos este
-#devolvera tambien un objeto que representa una tupla con los datos de conexion: IP y puerto
-sc, addr = s.accept()
- 
-while True:
- 
-    # Recibe mensaje
-    recibido = sc.recv(1024)
- 
-    # Muestra la IP y el mensaje recibido
-    print str(addr[0]) + " dice: ", recibido
- 
-    # Retorna el mansaje al cliente
-    sc.send(recibido)
+    try:
+        loop.run_forever()
+    except KeyboardInterrupt:
+        pass
 
-sc.close() # Cierra socket cliente
-s.close() # Cierra socket servidor
+    server.close()
+    loop.run_until_complete(server.wait_closed())
+    loop.close()
