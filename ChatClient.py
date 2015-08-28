@@ -9,7 +9,9 @@ import asyncio
 def enviar_mensaje(mensaje, servidor):
     servidor.write(mensaje.encode())
 
-
+### Esta funcion recibe un mensaje desde el servidor
+### Es su trabajo decidir que hacer con el
+### Idealmente lo muestra al usuario de alguna manera
 def recibir_mensaje(mensaje):
     print(mensaje.decode())
     
