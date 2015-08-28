@@ -17,12 +17,12 @@ def tcp_echo_client(loop, servidor, puerto):
         print(data.decode())
         
 if __name__ == '__main__':
-    print """
+    print ("""
     ,___,
     [O.o]   Welcome to Búho chat
     /)__)       Have fun!
     -”–”- 
-    """
+    """)
 
     servidor = sys.argv[1]
     puerto = sys.argv[2]
