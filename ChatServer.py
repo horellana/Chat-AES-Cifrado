@@ -21,6 +21,7 @@ class EchoServerClientProtocol(asyncio.Protocol):
         clientes.append(cliente)
         contador_usuarios = contador_usuarios + 1
         self.cliente = cliente
+        self.propagar('{} se a conectado'.format(cliente['nombre']))
     
     def propagar(self, mensaje):
         for cliente in clientes:
