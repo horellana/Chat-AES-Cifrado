@@ -1,8 +1,10 @@
 #!/usr/bin/env python
 
+import random
 import asyncio
 
 clientes = []
+contador_usuarios = 0
 
 ### Esta clase la saque de 
 ### https://docs.python.org/dev/library/asyncio-protocol.html#tcp-echo-server-protocol
@@ -11,18 +13,19 @@ clientes = []
 
 class EchoServerClientProtocol(asyncio.Protocol):
     def connection_made(self, transport):
-        self.peername = transport.get_extra_info('peername')
-        print('Conexion desde {}'.format(self.peername))
-        clientes.append(transport)
-        self.transport = transport
+        global contador_usuarios
+        cliente = {'nombre': 'user{}'.format(contador_usuarios),
+                   'transport': transport}
+        clientes.append(cliente)
+        contador_usuarios = contador_usuarios + 1
+        self.cliente = cliente
     
     def data_received(self, data):
         message = data.decode()
 
         for cliente in clientes:
-            if cliente is self.transport:
-                next
-            cliente.write('{}: {}'.format(self.peername, message).encode())
+            m = '{}: {}'.format(self.cliente['nombre'], message).encode()
+            cliente['transport'].write(m)
 
 loop = asyncio.get_event_loop()
 
