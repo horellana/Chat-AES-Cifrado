@@ -12,6 +12,6 @@ class Enigma: ### juejuejue
         return iv + cipher.encrypt(mensaje)
 
     def decifrar(self, mensaje):
-        iv = mensaje[0:16]
+        iv = mensaje[0:len(self.key)]
         cipher = AES.new(self.key, AES.MODE_CFB, iv)
-        return cipher.decrypt(mensaje)[16:]
+        return cipher.decrypt(mensaje)[len(self.key):]
