@@ -4,10 +4,10 @@ from Crypto.Cipher import AES
 from Crypto import Random
 
 
-class Enigma: ### juejuejue
+class Enigma:
     def __init__(self, key):
         self.key = key
-    
+
     def cifrar(self, mensaje):
         iv = Random.new().read(AES.block_size)
         cipher = AES.new(self.key, AES.MODE_CFB, iv)
