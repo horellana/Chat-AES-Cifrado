@@ -1,3 +1,5 @@
+import sys
+
 from Crypto.Cipher import AES
 from Crypto import Random
 
@@ -15,3 +17,11 @@ class Enigma: ### juejuejue
         iv = mensaje[0:len(self.key)]
         cipher = AES.new(self.key, AES.MODE_CFB, iv)
         return cipher.decrypt(mensaje)[len(self.key):]
+
+if __name__ == '__main__':
+    key = 'jhgthebnshdkfjeh'
+    e = Enigma(key)
+    cifrado = e.cifrar(sys.argv[1])
+
+    print('Cifrado: {}'.format(cifrado))
+    print('Sin cifrar: {}'.format(e.decifrar(cifrado)))
