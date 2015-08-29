@@ -1,10 +1,5 @@
 from Crypto.Cipher import AES
-
-#base64 is used for encoding. dont confuse encoding with encryption#
-#encryption is used for disguising data
-#encoding is used for putting data in a specific format
-import base64
-import os
+from Crypto import Random
 
 
 class Enigma: ### juejuejue
@@ -12,39 +7,11 @@ class Enigma: ### juejuejue
         self.key = key
     
     def cifrar(self, mensaje):
-        #32 bytes = 256 bits
-        #16 = 128 bits
-        # the block size for cipher obj, can be 16 24 or 32. 16 matches 128 bit.
-        BLOCK_SIZE = 16
-        # the character used for padding
-        # used to ensure that your value is always a multiple of BLOCK_SIZE
-        PADDING = '{'
-        # function to pad the functions. Lambda
-        # is used for abstraction of functions.
-        # basically, its a function, and you define it, followed by the param
-        # followed by a colon,
-        # ex = lambda x: x+5
-        pad = lambda s: s + (BLOCK_SIZE - len(s) % BLOCK_SIZE) * PADDING
-        # encrypt with AES, encode with base64
-        EncodeAES = lambda c, s: base64.b64encode(c.encrypt(pad(s)))
-        # generate a randomized secret key with urandom
-        secret = os.urandom(BLOCK_SIZE)
-        secret = bytes(secret)
-        #print 'encryption key:',secret
-        # creates the cipher obj using the key
-        cipher = AES.new(secret)
-        # encodes you private info!
-        encoded = EncodeAES(cipher, mensaje)
-        #print 'Encrypted string:', encoded
-        return encoded
+        iv = Random.new().read(AES.block_size)
+        cipher = AES.new(self.key, AES.MODE_CFB, iv)
+        return iv + cipher.encrypt(mensaje)
 
     def decifrar(self, mensaje):
-        PADDING = '{'
-        DecodeAES = lambda c, e: c.decrypt(base64.b64decode(e)).rstrip(PADDING)
-        #Key is FROM the printout of 'secret' in encryption
-        #below is the encryption.
-        encryption = mensaje
-        
-        cipher = AES.new(self.key)
-        decoded = DecodeAES(cipher, encryption)
-        return decoded
+        iv = mensaje[0:16]
+        cipher = AES.new(self.key, AES.MODE_CFB, iv)
+        return cipher.decrypt(mensaje)[16:]
