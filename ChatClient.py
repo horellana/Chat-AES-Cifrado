@@ -8,9 +8,10 @@ from Cifrado import Enigma
 
 
 class Cliente:
-    def __init__(self, servidor, enigma):
+    def __init__(self, servidor, key):
+        self.historial = []
         self.servidor = servidor
-        self.enigma = enigma
+        self.enigma = Enigma(key)
 
     # Este metodo  es llamada cuando el usuario ingresa un mensaje
     # recibe el mensaje y un socket conectado al servidor
@@ -18,7 +19,7 @@ class Cliente:
     def enviar_mensaje(self, mensaje):
         os.system('clear')
         epic_buho()
-        mostrar_historial()
+        self.mostrar_historial()
         self.servidor.write(self.enigma.cifrar(mensaje))
 
     # Este metodo recibe un mensaje desde el servidor
@@ -26,22 +27,16 @@ class Cliente:
     # Idealmente lo muestra al usuario de alguna manera
     def recibir_mensaje(self, mensaje):
         mensaje = self.enigma.decifrar(mensaje)
-        guardar_historial(mensaje)
+        self.guardar_historial(mensaje)
         print(mensaje + '\n')
 
+    def guardar_historial(self, mensaje):
+        self.historial.append(mensaje)
 
-def guardar_historial(mensaje):
-    ObjArchivo = open(os.getcwd()+'/historial.txt', mode='a', encoding='utf-8')
-    ObjArchivo.write(mensaje)  # escribe cadena1 añadiendo salto de línea
-    ObjArchivo.close  # cierra archivo
-
-
-def mostrar_historial():
-    archivo = open(os.getcwd()+'/historial.txt','r')  # abre archivo en modo lectura
-    lista = archivo.readlines()  # lee todas la líneas a una lista
-    for linea in lista[limite_inferior(lista):len(lista)]:
-        print(linea, end='')
-    archivo.close
+    def mostrar_historial(self):
+        for linea in self.historial[limite_inferior(self.historial)
+                                    :len(self.historial)]:
+            print(linea, end='')
 
 
 def limite_inferior(lista):
@@ -70,7 +65,7 @@ def tcp_echo_client(loop, servidor, puerto, key):
     # Nos conectamos al servidor
     r, w = yield from asyncio.open_connection(servidor, puerto, loop=loop)
 
-    cliente = Cliente(w, Enigma(key))
+    cliente = Cliente(w, key)
 
     # Escuchamos stdin por mensajes enviados por nosotros
     # (El cliente)
