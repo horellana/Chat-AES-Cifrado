@@ -26,16 +26,17 @@ class Cliente:
     # Es su trabajo decidir que hacer con el
     # Idealmente lo muestra al usuario de alguna manera
     def recibir_mensaje(self, mensaje):
-        mensaje = self.enigma.decifrar(mensaje)
-        self.guardar_historial(mensaje)
-        print(mensaje + '\n')
+        m = self.enigma.decifrar(mensaje)
+        self.guardar_historial(m)
+        print(m + '\n')
 
     def guardar_historial(self, mensaje):
         self.historial.append(mensaje)
 
     def mostrar_historial(self):
-        for linea in self.historial[limite_inferior(self.historial)
-                                    :len(self.historial)]:
+        h = self.historial
+        lineas = h[limite_inferior(h):len(h)]
+        for linea in lineas:
             print(linea, end='')
 
 
