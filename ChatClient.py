@@ -81,9 +81,6 @@ def tcp_echo_client(loop, servidor, puerto, key):
 if __name__ == '__main__':
     epic_buho()
 
-    ObjArchivo = open(os.getcwd()+'/historial.txt', mode='a', encoding='utf-8')
-    ObjArchivo.close
-
     servidor = sys.argv[1]
     puerto = sys.argv[2]
     key = sys.argv[3]
