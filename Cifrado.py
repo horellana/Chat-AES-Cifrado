@@ -16,7 +16,8 @@ class Enigma:
     def decifrar(self, mensaje):
         iv = mensaje[0:len(self.key)]
         cipher = AES.new(self.key, AES.MODE_CFB, iv)
-        return cipher.decrypt(mensaje)[len(self.key):]
+        secret = cipher.decrypt(mensaje)[len(self.key):]
+        return secret.decode('utf-8')
 
 if __name__ == '__main__':
     key = 'jhgthebnshdkfjeh'
