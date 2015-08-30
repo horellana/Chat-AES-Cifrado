@@ -26,8 +26,8 @@ class Cliente:
     # Idealmente lo muestra al usuario de alguna manera
     def recibir_mensaje(self, mensaje):
         mensaje = self.enigma.decifrar(mensaje)
-        guardar_historial(mensaje.decode())
-        print(mensaje.decode())
+        guardar_historial(mensaje)
+        print(mensaje + '\n')
 
 
 def guardar_historial(mensaje):
@@ -52,7 +52,7 @@ def limite_inferior(lista):
     elif (limite_inferior > 0):
         limite_inferior = limite_inferior
     else:
-        print ("esto no pasa :)")
+        print("esto no pasa :)")
     return limite_inferior
 
 
@@ -80,7 +80,8 @@ def tcp_echo_client(loop, servidor, puerto, key):
     while True:
         data = yield from r.read(100)
         cliente.recibir_mensaje(data)
-        
+
+
 if __name__ == '__main__':
     epic_buho()
 
@@ -90,8 +91,8 @@ if __name__ == '__main__':
     servidor = sys.argv[1]
     puerto = sys.argv[2]
     key = sys.argv[3]
-    
+
     loop = asyncio.get_event_loop()
-    
+
     loop.run_until_complete(tcp_echo_client(loop, servidor, puerto, key))
     loop.close()

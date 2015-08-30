@@ -29,7 +29,7 @@ class ChatServer(asyncio.Protocol):
         ChatServer.clientes.append(cliente)
         ChatServer.contador_usuarios += 1
         self.cliente = cliente
-        self.propagar('{} se conecto\n'.format(cliente['nombre']))
+        self.propagar('{} se conecto'.format(cliente['nombre']))
 
     def propagar(self, mensaje):
         mensaje = self.enigma.cifrar(mensaje)
@@ -46,7 +46,7 @@ class ChatServer(asyncio.Protocol):
         # Saca al cliente desconectado de la lista ...
         ChatServer.clientes = [c for c in ChatServer.clientes
                                if c['nombre'] != self.cliente['nombre']]
-        self.propagar('{} se desconecto\n'.format(self.cliente['nombre']))
+        self.propagar('{} se desconecto'.format(self.cliente['nombre']))
 
 
 if __name__ == '__main__':
