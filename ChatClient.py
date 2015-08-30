@@ -1,17 +1,29 @@
 #!/usr/bin/env python
 
+import os
 import sys
 import asyncio
-import os
 
 from Cifrado import Enigma
 
 
 class Cliente:
-    def __init__(self, servidor, key):
+    def __init__(self, key, main_loop, servidor, puerto):
         self.historial = []
-        self.servidor = servidor
         self.enigma = Enigma(key)
+        self.main_loop = main_loop
+        main_loop.add_reader(sys.stdin,
+                             lambda: self.enviar_mensaje(sys.stdin.readline()))
+
+    @asyncio.coroutine
+    def loop(self):
+        self.socket_r, self.socket_w = yield from asyncio.open_connection(servidor,
+                                                                          puerto,
+                                                                          loop=self.main_loop)
+        while True:
+            data = yield from self.socket_r.read(100)
+            mensaje = self.enigma.decifrar(data)
+            self.recibir_mensaje(mensaje)
 
     # Este metodo  es llamada cuando el usuario ingresa un mensaje
     # recibe el mensaje y un socket conectado al servidor
@@ -20,15 +32,14 @@ class Cliente:
         os.system('clear')
         epic_buho()
         self.mostrar_historial()
-        self.servidor.write(self.enigma.cifrar(mensaje))
+        self.socket_w.write(self.enigma.cifrar(mensaje))
 
     # Este metodo recibe un mensaje desde el servidor
     # Es su trabajo decidir que hacer con el
     # Idealmente lo muestra al usuario de alguna manera
     def recibir_mensaje(self, mensaje):
-        m = self.enigma.decifrar(mensaje)
-        self.guardar_historial(m)
-        print(m + '\n')
+        self.guardar_historial(mensaje)
+        print(mensaje + '\n')
 
     def guardar_historial(self, mensaje):
         self.historial.append(mensaje)
@@ -37,7 +48,7 @@ class Cliente:
         h = self.historial
         lineas = h[limite_inferior(h):len(h)]
         for linea in lineas:
-            print(linea, end='')
+            print(linea)
 
 
 def limite_inferior(lista):
@@ -61,23 +72,6 @@ def epic_buho():
     """)
 
 
-@asyncio.coroutine
-def tcp_echo_client(loop, servidor, puerto, key):
-    # Nos conectamos al servidor
-    r, w = yield from asyncio.open_connection(servidor, puerto, loop=loop)
-
-    cliente = Cliente(w, key)
-
-    # Escuchamos stdin por mensajes enviados por nosotros
-    # (El cliente)
-    loop.add_reader(sys.stdin,
-                    lambda: cliente.enviar_mensaje(sys.stdin.readline()))
-
-    while True:
-        data = yield from r.read(100)
-        cliente.recibir_mensaje(data)
-
-
 if __name__ == '__main__':
     epic_buho()
 
@@ -86,6 +80,7 @@ if __name__ == '__main__':
     key = sys.argv[3]
 
     loop = asyncio.get_event_loop()
+    cliente = Cliente(key, loop, servidor, puerto)
 
-    loop.run_until_complete(tcp_echo_client(loop, servidor, puerto, key))
+    loop.run_until_complete(cliente.loop())
     loop.close()
