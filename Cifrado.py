@@ -4,6 +4,10 @@ from Crypto.Cipher import AES
 from Crypto import Random
 
 
+modulo = 3
+generador = 17
+
+
 class Enigma:
     def __init__(self, key):
         self.key = key

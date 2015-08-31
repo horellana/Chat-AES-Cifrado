@@ -2,15 +2,15 @@
 
 import os
 import sys
+import json
 import asyncio
-
-from Cifrado import Enigma
+import Cifrado
+from Crypto.Util.number import getRandomInteger
 
 
 class Cliente:
-    def __init__(self, key, main_loop, servidor, puerto):
+    def __init__(self, main_loop, servidor, puerto):
         self.historial = []
-        self.enigma = Enigma(key)
         self.main_loop = main_loop
         main_loop.add_reader(sys.stdin,
                              lambda: self.enviar_mensaje(sys.stdin.readline()))
@@ -20,6 +20,22 @@ class Cliente:
         self.socket_r, self.socket_w = yield from asyncio.open_connection(servidor,
                                                                           puerto,
                                                                           loop=self.main_loop)
+
+        secreto = getRandomInteger(10)
+        generado = pow(Cifrado.generador, secreto) % Cifrado.modulo
+
+        self.socket_w.write(json.dumps({'gen-key': True,
+                                        'key': generado}).encode())
+
+        respuesta_servidor = yield from self.socket_r.read(100)
+        generado_servidor = json.loads(respuesta_servidor.decode())['gen']
+
+        key = pow(generado_servidor, secreto) % Cifrado.modulo
+
+        print("key: {}\n".format(key))
+
+        self.enigma = Cifrado.Enigma(str(key))
+
         while True:
             data = yield from self.socket_r.read(100)
             mensaje = self.enigma.decifrar(data)
@@ -77,10 +93,9 @@ if __name__ == '__main__':
 
     servidor = sys.argv[1]
     puerto = sys.argv[2]
-    key = sys.argv[3]
 
     loop = asyncio.get_event_loop()
-    cliente = Cliente(key, loop, servidor, puerto)
+    cliente = Cliente(loop, servidor, puerto)
 
     loop.run_until_complete(cliente.loop())
     loop.close()
