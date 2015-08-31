@@ -30,11 +30,14 @@ class Cliente:
         respuesta_servidor = yield from self.socket_r.read(100)
         generado_servidor = json.loads(respuesta_servidor.decode())['gen']
 
-        key = pow(generado_servidor, secreto) % Cifrado.modulo
+        key = str(pow(generado_servidor, secreto) % Cifrado.modulo)
 
-        print("key: {}\n".format(key))
+        if len(key) > 16:
+            key -= key * (len(key) - 16)
+        if len(key) < 16:
+            key += key * int(16 - len(key))
 
-        self.enigma = Cifrado.Enigma(str(key))
+        self.enigma = Cifrado.Enigma(key)
 
         while True:
             data = yield from self.socket_r.read(100)

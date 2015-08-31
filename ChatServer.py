@@ -45,19 +45,22 @@ class ChatServer(asyncio.Protocol):
                 generado_cliente = mensaje['key']
                 if generado_cliente:
                     secreto = getRandomInteger(10)
-                    key = pow(generado_cliente, secreto) % Cifrado.modulo
+                    key = str(pow(generado_cliente, secreto) % Cifrado.modulo)
                     generado = pow(Cifrado.generador, secreto) % Cifrado.modulo
 
-                    print("Key: {}\n".format(key))
-                    
+                    if len(key) > 16:
+                        key -= key * (len(key) - 16)
+                    if len(key) < 16:
+                        key += key * int(16 - len(key))
+
                     self.estado = 'key-ready'
                     self.enigma = Cifrado.Enigma(key)
                     self.transport.write(json.dumps({'gen': generado}).encode())
         
         elif self.estado == 'key-ready':
             # Aqui enviamos el mensaje a todos los clientes conectados
-            self.propagar('{}: {}'.format(self.nombre_cliente),
-                          self.enigma.decifrar(data))
+            self.propagar('{}: {}'.format(self.nombre_cliente,
+                                          self.enigma.decifrar(data)))
 
     def connection_lost(self, exc):
         # Saca al cliente desconectado de la lista ...
