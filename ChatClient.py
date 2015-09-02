@@ -28,14 +28,11 @@ class Cliente:
                                         'key': generado}).encode())
 
         respuesta_servidor = yield from self.socket_r.read(100)
-        generado_servidor = json.loads(respuesta_servidor.decode())['gen']
+        respuesta_servidor = json.loads(respuesta_servidor.decode())
+        generado_servidor = respuesta_servidor['gen']
 
         key = str(pow(generado_servidor, secreto) % Cifrado.modulo)
-
-        if len(key) > 16:
-            key -= key * (len(key) - 16)
-        if len(key) < 16:
-            key += key * int(16 - len(key))
+        key = Cifrado.normalizar_key(key)
 
         self.enigma = Cifrado.Enigma(key)
 

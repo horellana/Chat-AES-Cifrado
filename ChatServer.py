@@ -48,10 +48,7 @@ class ChatServer(asyncio.Protocol):
                     key = str(pow(generado_cliente, secreto) % Cifrado.modulo)
                     generado = pow(Cifrado.generador, secreto) % Cifrado.modulo
 
-                    if len(key) > 16:
-                        key -= key * (len(key) - 16)
-                    if len(key) < 16:
-                        key += key * int(16 - len(key))
+                    key = Cifrado.normalizar_key(key)
 
                     self.estado = 'key-ready'
                     self.enigma = Cifrado.Enigma(key)

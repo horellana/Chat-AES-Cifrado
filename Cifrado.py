@@ -8,6 +8,14 @@ modulo = 3
 generador = 17
 
 
+def normalizar_key(key):
+    if len(key) > 16:
+        key -= key * (len(key) - 16)
+    if len(key) < 16:
+        key += key * int(16 - len(key))
+
+    return key
+
 class Enigma:
     def __init__(self, key):
         self.key = key
